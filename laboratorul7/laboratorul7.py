@@ -9,13 +9,14 @@ def functie1(param):
     # problema cu '\w+' este ca ia si caracterul '_'
     alpha_numeric = re.findall(r"\w+", param)
     return alpha_numeric
-print("1.", functie1("Am +#$ reusit !!! sa %^&* rezolv exercitiul 1."))
+print("1.", functie1("Am +#$ !reusit_ !!! sa %^&* rezolv exercitiul 1."))
 
 
 # Exercitiul 2
 # Write a function that receives as a parameter a regex string, a text string and a whole number x, and returns those long-length x substrings that match the regular expression.
 def functie2(reg_str, text, x):
     out = []
+    # format: re.findall(patern, string, flags=0) | sunt incluse si matchurile goale, returneaza: o lista de tuple
     # caut toate aparitiile stringului regex in text 
     match_x = re.findall(reg_str, text)
     for elem in match_x:
@@ -23,7 +24,7 @@ def functie2(reg_str, text, x):
         if len(elem) == x:
             out.append(elem)
     return out
-print("2.", functie2("regex", "Un exemplu cu regex string si verific aparitia lui regex", 5))
+print("2.", functie2("regex", "Un exemplu cu regex string si verific aparitia cuvantului regex", 5))
 
 
 # Exercitiul 3
@@ -36,6 +37,16 @@ def functie3(text, reg_list):
     return out
 print("3.", functie3("Ana are mere", ["Mihai are CNP valid", "Ana" , "are", "mere"]))
 
+# Exercitiul 3 - modificat
+# Write a function that receives two parameters: a list of strings and a list of regular expressions. The function will return a list of the strings that match on at least one regular expression from the list given as parameter.
+def functie3_modificata(text, reg_list):
+    out = []
+    for elem_lista in text:
+        for elem_reg in reg_list:
+            if re.findall(elem_reg, elem_lista):
+                out.append(re.findall(elem_reg, elem_lista))
+    return out
+print("3 - modificat.", functie3_modificata(["Ana are mere", "Mihai are CNP valid"], ["CNP", "Ana are", "mere"]))
 
 # Exercitiul 4
 # Write a function that receives as a parameter the path to an xml document and an attrs dictionary and returns those elements that have as attributes all the keys in the dictionary and values ​​the corresponding values. For example, if attrs={"class": "url", "name": "url-form", "data-id": "item"} the items selected will be those tags whose attributes are class="url" si name="url-form" si data-id="item".
@@ -43,6 +54,8 @@ def validare_atribute(linie, dict_attr):
     for key_attr in dict_attr:
         # f'..' - format: key = "atribut" (e.g. class = "url")
         curr_tag = f'{key_attr}\\s*=\\s*"{dict_attr[key_attr]}"'
+        # format re.search(pattern, string, flags=0) | cauta prima locatie in care da match | returneaza: primul rezultat sau None daca nu a gasit nimic
+        # in cazul de fata toate atributele date ca parametru trebuie sa dea match
         if not re.search(curr_tag, linie):
             return False
     return True
@@ -63,6 +76,7 @@ def validare_atribute5(linie, dict_attr):
     state = 0
     for key_attr in dict_attr:
         curr_tag = f'{key_attr}\\s*=\\s*"{dict_attr[key_attr]}"'
+        # in acest caz un singur atribut trebuie sa dea match, moment in care executia for-ului este oprita
         if re.search(curr_tag, linie):
             state = 1
             break
@@ -98,6 +112,7 @@ def functie6(text):
     for cuvant in str.split(text, " "):
         # verific daca incepe si se termina cu vocala
         # \b inceput ... final \b
+        # re.match(aceeasi param) | cauta caracterele care dau match cu pattern-ul | alternativa mai buna: search daca vrem sa cautam intr-un string
         if re.match(r"\b[aeiou]\w*[aeiou]\b", cuvant):
             prop_finala += cenzor(cuvant)
         else:
@@ -127,6 +142,7 @@ functie7 = functie7("6120405228203")
 def functie8(direc, param):
     out = []
     # parametrii de care are nevoie os.walk
+    # by default imi cauta topdown in folder
     for folder_param, foldere, fisiere in os.walk(direc):
         for fisier in fisiere:
             if fisier == param and re.search(param, fisier):

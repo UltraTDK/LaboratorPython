@@ -51,6 +51,7 @@ def parcurge_argumente(args):
     return out
 def functie4(*args, **kwargs):
     return parcurge_argumente(args) + parcurge_argumente(kwargs.values())
+# Diferenta intre argument si keyword_argument este key-ul
 # Pana la "dictionar=.." am arguments, dupa keyword_arguments. Format "key=...". Dupa ce am kw_args, pot sa pun doar kw_args
 print("4:", functie4({1: 2, 3: 4, 5: 6}, {'a': 5, 'b': 7, 'c': 'e'}, {2: 3}, [1, 2, 3], {'abc': 4, 'def': 5}, 3764, dictionar={'ab': 4, 'ac': 'abcde', 'fg': 'abc'}, test={1: 1, 'test': True}))
 
@@ -76,14 +77,16 @@ def functie6(lista):
     lista_pare = []
     lista_impare = []  
     lista_finala = []
+    # creez o lista separata pentru numere pare si impare
     for elem in lista:
         if(elem % 2 == 0):
             lista_pare.append(elem)
         elif (elem % 2 == 1):
             lista_impare.append(elem)
-    # zip creeaza tuple cu cele doua liste pe care i le-am dat ca parametru
+    # zip este un iterator tuple, primul parametru si al doilea parametru sunt unite impreuna
+    # mentiune: daca iteratorii dati ca parametru au lungimi diferite, iteratorul cu cele mai putine elemente decide noua lungime a iteratorului
     tuplu_zip = list(zip(lista_pare, lista_impare))
-
+    # in final toate tuplele sunt puse intr o lista
     for i in range(0, len(lista_pare)):
         tuplu = lista_pare[i], lista_impare[i]
         lista_finala.append(tuplu)
@@ -107,10 +110,12 @@ def Fib1000():
 # Daca filter_func are macar un False atunci functia trebuie sa returneze False
 def filtru(filtre, x):
     for filter_func in filtre:
+        # Parametrii de filters ii iau ca pe o functie
         if filter_func(x) == False:
             return False
     return True
 def process(**kwargs):
+    # initializare
     filters = []
     limit = 1000
     offset = 0
@@ -124,9 +129,11 @@ def process(**kwargs):
             limit = kwargs["limit"]
         elif kw_arg == "offset":
             offset = kwargs["offset"]
+    # filtrez lista in functie de parametri
     for elem in lista_fib:
         if filtru(filters, elem) == True:
             out.append(elem)
+    # in lista_final pun doar elementele din lista out care incep de la offset si se termina la limit
     for elem in range(offset, offset + limit):
         lista_finala.append(out[elem])
     return lista_finala
@@ -139,12 +146,13 @@ print("7.", functie7())
 # Exercitiul 8
 # Write a function called print_arguments with one parameter named function. The function will return one new function which prints the arguments and the keyword arguments received and will return the output of the function receives as a parameter.
 def print_arguments(function):
+    # functie imbricata, o functie folosita in alta functie
     def afisare_param(*args, **kwargs):
         print(args, kwargs)
         return function(*args, **kwargs)
     return afisare_param
 # Decoratorul este de regula o functie care primeste ca parametru o alta functie
-# Am folosit decorator pentru usurinta rezolvarii problemei
+# In principiu extinde functionalitatea unei functii fara a modifica functia in sine
 @print_arguments
 def multiply_by_two(x):
     return x * 2
@@ -169,6 +177,7 @@ print("8. b)", multiply_by_three(10))
 def functie9(pairs):
     out = []
     for tuplu in pairs:
+        # creez un dictionar cu anumite key
         pereche = {
             "sum": tuplu[0] + tuplu[1],
             "prod": tuplu[0] * tuplu[1],
