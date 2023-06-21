@@ -1,5 +1,5 @@
 # Laborator Python
-Aici o sa fie postate solutiile din cadrul laboratoarelor de Programare Avansata  
+Aici o sa fie postate solutiile din cadrul laboratoarelor de Python
 
 * Student:  
 
