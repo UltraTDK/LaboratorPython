@@ -1,193 +1,204 @@
+import os
+
+# Regular expressions
+import re
+
+
+# Exercitiul 1
+# Write a function that extracts the words from a given text as a parameter. A word is defined as a sequence of alpha-numeric characters.
+def functie1(param):
+    # expresia '\w+' este folosita pentru a extrage caractere alpha numerice
+    # problema cu '\w+' este ca ia si caracterul '_'
+    alpha_numeric = re.findall(r"\w+", param)
+    return alpha_numeric
+
+
+print("1.", functie1("Am +#$ !reusit_ !!! sa %^&* rezolv exercitiul 1."))
+
+
 # Exercitiul 2
-#  Create a function and an anonymous function that receive a 
-# variable number of arguments. Both will return the sum of 
-# the values of the keyword arguments
-def functie2(*args, **kwargs):
-    sum = 0
-    for kw_argument in kwargs.keys():
-        sum += int(kwargs[kw_argument])
-    return sum
+# Write a function that receives as a parameter a regex string, a text string and a whole number x, and returns those long-length x substrings that match the regular expression.
+def functie2(reg_str, text, x):
+    out = []
+    # format: re.findall(patern, string, flags=0) | sunt incluse si matchurile goale, returneaza: o lista de tuple
+    # caut toate aparitiile stringului regex in text
+    match_x = re.findall(reg_str, text)
+    for elem in match_x:
+        # verific daca lungimea elementului gasit are lungimea x
+        if len(elem) == x:
+            out.append(elem)
+    return out
 
 
-# Functii anonime = lambda expressions
-# exemplu 
-# suma = lambda a, b: a + b
-# print(suma(2, 3))
-anonymous_function = lambda *args, **kwargs: sum([kw_args for kw_args in kwargs.values()])
-print("2. Functie anonima:", anonymous_function(1, 2, c=3, d=4))
-print("2. Functie normala:", functie2(1, 2, c=3, d=4))
+print(
+    "2.",
+    functie2(
+        "regex", "Un exemplu cu regex string si verific aparitia cuvantului regex", 5
+    ),
+)
 
 
 # Exercitiul 3
-# Using functions, anonymous functions, list comprehensions and filter, implement three methods to generate a list with all the vowels in a given string.
-# For the string "Programming in Python is fun" the list returned will be ['o', 'a', 'i', 'i', 'o', 'i', 'u'].
-def functie3(sir):
+# Write a function that receives as a parameter a string of text characters and a list of regular expressions and returns a list of strings that match on at least one regular expression given as a parameter.
+def functie3(text, reg_list):
     out = []
-    for litera in sir:
-        if litera.lower() in "aeiou":
-            out.append(litera.lower()) 
+    for elem in reg_list:
+        if re.findall(elem, text):
+            out.append(re.findall(elem, text))
     return out
-anon_func_string = lambda sir: [litera for litera in sir if litera.lower() in "aeiou"]
-def filtru(ch):
-    if ch.lower() in "aeiou":
-        return True
-    return False
-filtered_list = list(filter(filtru, "Programming in python is fun"))
-print("3. Functie:", functie3("Programming in Python is fun"))
-print("3. Functie anonima:", anon_func_string("Programming in Python is fun"))
-print("3. Filtered list:", filtered_list)
 
 
-# Exercitiul4
-# Write a function that receives a variable number of arguments and keyword arguments. The function returns a list containing only the arguments which are dictionaries, containing minimum 2 keys
-#  and at least one string key with minimum 3 characters.
-def parcurge_argumente(args):
+print("3.", functie3("Ana are mere", ["Mihai are CNP valid", "Ana", "are", "mere"]))
+
+
+# Exercitiul 3 - modificat
+# Write a function that receives two parameters: a list of strings and a list of regular expressions. The function will return a list of the strings that match on at least one regular expression from the list given as parameter.
+def functie3_modificata(text, reg_list):
     out = []
-    for argument in args:
-        if type(argument) == dict and len(argument.keys()) >= 2:
-            for key in argument.keys():
-                if type(key) == str and len(key) >= 3:
-                    out.append(argument)
-                    break
+    for elem_lista in text:
+        for elem_reg in reg_list:
+            if re.findall(elem_reg, elem_lista):
+                out.append(re.findall(elem_reg, elem_lista))
     return out
-def functie4(*args, **kwargs):
-    return parcurge_argumente(args) + parcurge_argumente(kwargs.values())
-# Diferenta intre argument si keyword_argument este key-ul
-# Pana la "dictionar=.." am arguments, dupa keyword_arguments. Format "key=...". Dupa ce am kw_args, pot sa pun doar kw_args
-print("4:", functie4({1: 2, 3: 4, 5: 6}, {'a': 5, 'b': 7, 'c': 'e'}, {2: 3}, [1, 2, 3], {'abc': 4, 'def': 5}, 3764, dictionar={'ab': 4, 'ac': 'abcde', 'fg': 'abc'}, test={1: 1, 'test': True}))
+
+
+print(
+    "3 - modificat.",
+    functie3_modificata(
+        ["Ana are mere", "Mihai are CNP valid"], ["CNP", "Ana are", "mere"]
+    ),
+)
+
+
+# Exercitiul 4
+# Write a function that receives as a parameter the path to an xml document and an attrs dictionary and returns those elements that have as attributes all the keys in the dictionary and values ​​the corresponding values. For example, if attrs={"class": "url", "name": "url-form", "data-id": "item"} the items selected will be those tags whose attributes are class="url" si name="url-form" si data-id="item".
+def validare_atribute(linie, dict_attr):
+    for key_attr in dict_attr:
+        # f'..' - format: key = "atribut" (e.g. class = "url")
+        curr_tag = f'{key_attr}\\s*=\\s*"{dict_attr[key_attr]}"'
+        # format re.search(pattern, string, flags=0) | cauta prima locatie in care da match | returneaza: primul rezultat sau None daca nu a gasit nimic
+        # in cazul de fata toate atributele date ca parametru trebuie sa dea match
+        if not re.search(curr_tag, linie):
+            return False
+    return True
+
+
+def functie4(path_xml, dict_attr):
+    out = []
+    # salvez fisierul intr-o variabila
+    with open(path_xml) as file:
+        for linie_xml in file.readlines():
+            if validare_atribute(linie_xml, dict_attr):
+                out.append(linie_xml)
+    return out
+
+
+print(
+    "4.",
+    functie4("laboratorul6/Lab6.xml", {"class": "my-class", "name": "Despre-somn"}),
+)
 
 
 # Exercitiul 5
-#  Write a function with one parameter which represents a list. 
-#  The function will return a new list containing all the numbers
-# found in the given list
-def number_list(list):
-    # Python are trei tipuri de date numerice : int, float si complex
-    lista_numere = []
-    lista = (int, float, complex)
-    for elem in list:
-        if isinstance(elem, lista):
-            lista_numere.append(elem)
-    return lista_numere
-print("5.", number_list([1, "2", {"3": "a"}, {4, 5}, 5, 6, 3.0]))
+# Write another variant of the function from the previous exercise that returns those elements that have at least one attribute that corresponds to a key-value pair in the dictionary.
+def validare_atribute5(linie, dict_attr):
+    state = 0
+    for key_attr in dict_attr:
+        curr_tag = f'{key_attr}\\s*=\\s*"{dict_attr[key_attr]}"'
+        # in acest caz un singur atribut trebuie sa dea match, moment in care executia for-ului este oprita
+        if re.search(curr_tag, linie):
+            state = 1
+            break
+    if state == 0:
+        return False
+    if state == 1:
+        return True
+
+
+def functie5(path_xml, dict_attr):
+    out = []
+    with open(path_xml) as file:
+        for linie_xml in file.readlines():
+            if validare_atribute5(linie_xml, dict_attr):
+                out.append(linie_xml)
+    return out
+
+
+print(
+    "5.",
+    functie5("laboratorul6/Lab6.xml", {"class": "my-class", "name": "Despre-somn"}),
+)
 
 
 # Exercitiul 6
-# Write a function that receives a list with integers as parameter that contains an equal number of even and odd numbers that are in no specific order. The function should return a list of pairs
-# (tuples of 2 elements) of numbers (Xi, Yi) such that Xi is the i-th even number in the list and Yi is the i-th odd number
-def functie6(lista):
-    lista_pare = []
-    lista_impare = []  
-    lista_finala = []
-    # creez o lista separata pentru numere pare si impare
-    for elem in lista:
-        if(elem % 2 == 0):
-            lista_pare.append(elem)
-        elif (elem % 2 == 1):
-            lista_impare.append(elem)
-    # zip este un iterator tuple, primul parametru si al doilea parametru sunt unite impreuna
-    # mentiune: daca iteratorii dati ca parametru au lungimi diferite, iteratorul cu cele mai putine elemente decide noua lungime a iteratorului
-    tuplu_zip = list(zip(lista_pare, lista_impare))
-    # in final toate tuplele sunt puse intr o lista
-    for i in range(0, len(lista_pare)):
-        tuplu = lista_pare[i], lista_impare[i]
-        lista_finala.append(tuplu)
-    print("6. zip: ", tuplu_zip)
-    print("6. Fara zip:", lista_finala)
-functie6([1, 3, 5, 2, 8, 7, 4, 10, 9, 2])
+# Write a function that, for a text given as a parameter, censures words that begin and end with vowels. Censorship means replacing characters from odd positions with *.
+def cenzor(cuvant):
+    cuvant_cenzurat = ""
+    for i in range(0, len(cuvant)):
+        if i % 2 == 0:
+            cuvant_cenzurat += cuvant[i]
+        else:
+            cuvant_cenzurat += "*"
+    return cuvant_cenzurat
+
+
+# Scenarii in care este posibil sa nu functioneze cum trebuie:
+# - daca am mai multe spatii, afisarea se va face cu un singur spatiu
+# - daca un cuvant este precedat de un caracter, nu este modificat
+def functie6(text):
+    prop_finala = ""
+    for cuvant in str.split(text, " "):
+        # verific daca incepe si se termina cu vocala
+        # \b inceput ... final \b
+        # re.match(aceeasi param) | cauta caracterele care dau match cu pattern-ul | alternativa mai buna: search daca vrem sa cautam intr-un string
+        if re.match(r"\b[aeiou]\w*[aeiou]\b", cuvant):
+            prop_finala += cenzor(cuvant)
+        else:
+            prop_finala += cuvant
+        prop_finala += " "
+    return prop_finala
+
+
+print(
+    "6.",
+    functie6("Daca incepe cu vocala si se termina cu vocala, atunci se va cenzura."),
+)
 
 
 # Exercitiul 7
-def Fib1000():
-    # Fib: adun ultimele doua valori care o preceda pe urmatoarea pana ajung la 1000 de numere
-    nr1 = 0
-    nr2 = 1
-    lista_fib = [0, 1]
-    for i in range(2, 1000) :
-        element_lista = nr1 + nr2
-        nr1 = nr2
-        nr2 = element_lista
-        lista_fib.append(element_lista)
-    return lista_fib
-# Daca filter_func are macar un False atunci functia trebuie sa returneze False
-def filtru(filtre, x):
-    for filter_func in filtre:
-        # Parametrii de filters ii iau ca pe o functie
-        if filter_func(x) == False:
-            return False
-    return True
-def process(**kwargs):
-    # initializare
-    filters = []
-    limit = 1000
-    offset = 0
-    out = []
-    lista_finala = []
-    lista_fib = Fib1000()
-    for kw_arg in kwargs.keys():
-        if kw_arg == "filters":
-            filters = kwargs["filters"]
-        elif kw_arg == "limit":
-            limit = kwargs["limit"]
-        elif kw_arg == "offset":
-            offset = kwargs["offset"]
-    # filtrez lista in functie de parametri
-    for elem in lista_fib:
-        if filtru(filters, elem) == True:
-            out.append(elem)
-    # in lista_final pun doar elementele din lista out care incep de la offset si se termina la limit
-    for elem in range(offset, offset + limit):
-        lista_finala.append(out[elem])
-    return lista_finala
-def sum_digits(x):
-    return sum(map(int, str(x)))
-def functie7():
-    return process(filters=[lambda item: item % 2 == 0, lambda item: item == 2 or 4 <= sum_digits(item) <= 20], limit=2, offset=2)
-print("7.", functie7())
+# Verify using a regular expression whether a string is a valid CNP.
+# Linkuri utile:
+# https://ro.wikipedia.org/wiki/Cod_numeric_personal_(Rom%C3%A2nia)
+# https://regex101.com/
+def functie7(param):
+    # Format: 6+12+04+05+228203
+    cnp = re.match(
+        r"^[0-8]\d\d((0[1-9])|(1[0-2]))((0[1-9])|([12]\d)|(3[01]))\d{6}$", param
+    )
+    if cnp != None:
+        print("CNP-ul este valid.")
+    else:
+        print("CNP-ul nu este valid.")
+
+
+functie7 = functie7("6120405228203")
+
 
 # Exercitiul 8
-# Write a function called print_arguments with one parameter named function. The function will return one new function which prints the arguments and the keyword arguments received and will return the output of the function receives as a parameter.
-def print_arguments(function):
-    # functie imbricata, o functie folosita in alta functie
-    def afisare_param(*args, **kwargs):
-        print(args, kwargs)
-        return function(*args, **kwargs)
-    return afisare_param
-# Decoratorul este de regula o functie care primeste ca parametru o alta functie
-# In principiu extinde functionalitatea unei functii fara a modifica functia in sine
-@print_arguments
-def multiply_by_two(x):
-    return x * 2
-@print_arguments
-def add_numbers(a, b):
-    return a + b
-print("8. a)", multiply_by_two(2))
-print("8. a)", add_numbers(3, 4))
-
-
-def multiply_output(function):
-    def afisare_param(*args, **kwargs):
-        return 2 * function(*args, **kwargs)
-    return afisare_param
-@multiply_output
-def multiply_by_three(x):
-    return x * 3
-print("8. b)", multiply_by_three(10))
-
-# Exercitiul 9
-# Write a function that receives a list of pairs of integers (tuples with 2 elements) as parameter (named pairs). The function should return a list of dictionaries for each pair (in the same order as in the input list) that contain the following keys (as strings): sum (the value should be sum of the 2 numbers), prod (the value should be product of the two numbers), pow (the value should be the first number raised to the power of the second number)
-def functie9(pairs):
+# Write a function that recursively scrolls a directory and displays those files whose name matches a regular expression given as a parameter or contains a string that matches the same expression. Files that satisfy both conditions will be prefixed with ">>"
+def functie8(direc, param):
     out = []
-    for tuplu in pairs:
-        # creez un dictionar cu anumite key
-        pereche = {
-            "sum": tuplu[0] + tuplu[1],
-            "prod": tuplu[0] * tuplu[1],
-            "pow": tuplu[0] ** tuplu[1]
-            # alta metoda de ridicare la putere:
-            # pow(tuplu[0], tuplu[1])
-        }
-        out.append(pereche)
+    # parametrii de care are nevoie os.walk
+    # by default imi cauta topdown in folder
+    for folder_param, foldere, fisiere in os.walk(direc):
+        for fisier in fisiere:
+            if fisier == param and re.search(param, fisier):
+                out.append(">>" + fisier)
+            elif fisier == param:
+                out.append(fisier)
+            elif re.search(param, fisier):
+                out.append(fisier)
     return out
 
-print("9.", functie9(pairs = [(5, 2), (19, 1), (30, 6), (2, 2)]))
+
+print("8.", functie8("../Laborator", "laboratorul6.py"))

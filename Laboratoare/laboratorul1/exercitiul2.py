@@ -1,5 +1,6 @@
 # Write a script that calculates how many vowels are in a string
 
+
 def counterVocale(str):
     counter = 0
     vocale = set("aeiouAEIOU")

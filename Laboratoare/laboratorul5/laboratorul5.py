@@ -1,165 +1,253 @@
-import os
-import sys
-
-# Exercitiul 1
-# Să se scrie o funcție ce primeste un singur parametru, director, ce reprezintă calea către un director
-# Funcția returnează o listă cu extensiile unice sortate crescator (in ordine alfabetica) a fișierelor din directorul dat ca parametru.
-def functie1(direc):
-    out = []
-    # parametrii de care are nevoie os.walk
-    # by default imi cauta topdown in folder
-    for radacina, foldere, fisiere in os.walk(direc):
-        for fisier in fisiere:
-            # am divizat calea fisierului in doua parti, nume si extensie
-            extensie = os.path.splitext(fisier)
-            if extensie[1] != "":
-                out.append(extensie[1])
-    return sorted(out)
-print("1.", functie1("../Laborator"))
-
-
 # Exercitiul 2
-# Să se scrie o funcție ce primește ca argumente două căi: director si fișier
-# Implementati functia astfel încât în fișierul de la calea fișier să fie scrisă pe câte o linie, calea absolută a fiecărui fișier din interiorul directorului de la calea folder, care incepe cu litera A. 
-def functie2(director, fisier):
-    with open(fisier, "w") as my_file:
-        for file in os.listdir(director):
-            # obtin calea absoluta a unui fisier
-            cale_fisier = os.path.abspath(file)
-            # verific daca este fisier si daca incepe cu litera A
-            if os.path.isfile(cale_fisier) and file.startswith("A"):
-                my_file.write(cale_fisier + "\n")
-print("2.", functie2(".", "cale_absoluta.txt"))
-            
+#  Create a function and an anonymous function that receive a
+# variable number of arguments. Both will return the sum of
+# the values of the keyword arguments
+def functie2(*args, **kwargs):
+    sum = 0
+    for kw_argument in kwargs.keys():
+        sum += int(kwargs[kw_argument])
+    return sum
+
+
+# Functii anonime = lambda expressions
+# exemplu
+# suma = lambda a, b: a + b
+# print(suma(2, 3))
+anonymous_function = lambda *args, **kwargs: sum(
+    [kw_args for kw_args in kwargs.values()]
+)
+print("2. Functie anonima:", anonymous_function(1, 2, c=3, d=4))
+print("2. Functie normala:", functie2(1, 2, c=3, d=4))
+
 
 # Exercitiul 3
-# Să se scrie o funcție ce primește ca parametru un string my_path.
-# Dacă parametrul reprezintă calea către un fișier, se vor returna ultimele 20 de caractere din conținutul fișierului. Dacă parametrul reprezintă calea către un director, se va returna o listă de tuple (extensie, count), sortată descrescător după count, unde extensie reprezintă extensie de fișier, iar count - numărul de fișiere cu acea extensie. Lista se obține din toate fișierele (recursiv) din directorul dat ca parametru. 
-def functie3(my_path):
-    count = 0
-    if os.path.isfile(my_path):
-        with open(my_path, "r") as my_file:
-            if os.path.getsize(my_path) >= 20:
-                # returneaza ultimele 20 de caractere dintr-un fisier
-                # -20: - parcurge 20 de caractere de la coada la cap
-                return my_file.read()[-20:]
-            else:
-                return "Fisierul nu are mai mult de 20 de caractere."
-    elif os.path.isdir(my_path):
-        lista_tuple = {}
-        for radacina, foldere, fisiere in os.walk(my_path):
-            for fisier in fisiere:
-                # am creat un dictionar cu extensii + countul fiecarei extensii
-                extensie = os.path.splitext(fisier)
-                if extensie[1] in lista_tuple:
-                    lista_tuple[extensie[1]] += 1
-                # initializez fiecare extensie
-                else:
-                    lista_tuple[extensie[1]] = 1
-    
-    lista_recursiv = sorted(lista_tuple, key = lambda x: lista_tuple[x], reverse = True)
+# Using functions, anonymous functions, list comprehensions and filter, implement three methods to generate a list with all the vowels in a given string.
+# For the string "Programming in Python is fun" the list returned will be ['o', 'a', 'i', 'i', 'o', 'i', 'u'].
+def functie3(sir):
     out = []
-    for elem in lista_recursiv:
-        pereche = (elem, lista_tuple[elem])
-        out.append(pereche)
+    for litera in sir:
+        if litera.lower() in "aeiou":
+            out.append(litera.lower())
     return out
-# Verificare pt director
-# print("3.", functie3("../Laborator"))
-# Verificare pt fisier
-print("3.", functie3("exemplu.txt"))
 
-# Exercitiul 4
-# Să se scrie o funcție ce returnează o listă cu extensiile unice a fișierelor din directorul dat ca argument la linia de comandă (nerecursiv). Lista trebuie să fie sortată crescător.
-# Mențiune: extensia fișierului ‘fisier.txt’ este ‘txt’, iar ‘fisier’ nu are extensie, deci nu va apărea în lista finală. 
-def functie4():
-    # trebuie sa apelez fisierul de la linia de comanda
-    # de exemplu: py laboratorul5/laboratorul5.py .  --> cu "." imi cauta in tot folderul Laborator   
-    cale_dir = sys.argv[1]
-    lista_tuple = {}
+
+anon_func_string = lambda sir: [litera for litera in sir if litera.lower() in "aeiou"]
+
+
+def filtru(ch):
+    if ch.lower() in "aeiou":
+        return True
+    return False
+
+
+filtered_list = list(filter(filtru, "Programming in python is fun"))
+print("3. Functie:", functie3("Programming in Python is fun"))
+print("3. Functie anonima:", anon_func_string("Programming in Python is fun"))
+print("3. Filtered list:", filtered_list)
+
+
+# Exercitiul4
+# Write a function that receives a variable number of arguments and keyword arguments. The function returns a list containing only the arguments which are dictionaries, containing minimum 2 keys
+#  and at least one string key with minimum 3 characters.
+def parcurge_argumente(args):
     out = []
-    for radacina, foldere, fisiere in os.walk(cale_dir):
-        for fisier in fisiere:
-            extensie = os.path.splitext(fisier)
-            if extensie[1] in lista_tuple:
-                lista_tuple[extensie[1]] += 1
-            else:
-                lista_tuple[extensie[1]] = 1
-    for elem in lista_tuple.keys():
-        # caut elementele unice
-        if lista_tuple[elem] == 1:
-            out.append(elem)
-    return sorted(out)
-# print("4.", functie4())
+    for argument in args:
+        if type(argument) == dict and len(argument.keys()) >= 2:
+            for key in argument.keys():
+                if type(key) == str and len(key) >= 3:
+                    out.append(argument)
+                    break
+    return out
+
+
+def functie4(*args, **kwargs):
+    return parcurge_argumente(args) + parcurge_argumente(kwargs.values())
+
+
+# Diferenta intre argument si keyword_argument este key-ul
+# Pana la "dictionar=.." am arguments, dupa keyword_arguments. Format "key=...". Dupa ce am kw_args, pot sa pun doar kw_args
+print(
+    "4:",
+    functie4(
+        {1: 2, 3: 4, 5: 6},
+        {"a": 5, "b": 7, "c": "e"},
+        {2: 3},
+        [1, 2, 3],
+        {"abc": 4, "def": 5},
+        3764,
+        dictionar={"ab": 4, "ac": "abcde", "fg": "abc"},
+        test={1: 1, "test": True},
+    ),
+)
+
 
 # Exercitiul 5
-# Să se scrie o funcție care primește ca argumente două șiruri de caractere, target și to_search și returneaza o listă de fișiere care conțin to_search. Fișierele se vor căuta astfel: dacă target este un fișier, se caută doar in fișierul respectiv iar dacă este un director se va căuta recursiv in toate fișierele din acel director. Dacă target nu este nici fișier, nici director, se va arunca o excepție de tipul ValueError cu un mesaj corespunzator.
-def functie5(target, to_search):
-    content = ""
-    target_dir = []
-    if os.path.isfile(target):
-        with open(target, "r") as my_file:
-            content = my_file.read()
-            if to_search in content:
-                return [target]
-            else:
-                return []
-    elif os.path.isdir(target):
-        for radacina, foldere, fisiere in os.walk(target):
-            for fisier in fisiere:
-                if os.path.isfile(fisier):
-                    with open(fisier, "r") as my_file:
-                        content = my_file.read()
-                        if to_search in content:
-                            target_dir.append(fisier)
-        return target_dir
-    else:
-        # conform cerintei am aruncat o exceptie
-        raise ValueError("Nu este nici fisier nici director.")
-    
-# print("5.", functie5("laboratorul5/laboratorul5.py", "exemplu.txt"))
-print("5.", functie5("../Laborator", "exemplu.txt"))
+#  Write a function with one parameter which represents a list.
+#  The function will return a new list containing all the numbers
+# found in the given list
+def number_list(list):
+    # Python are trei tipuri de date numerice : int, float si complex
+    lista_numere = []
+    lista = (int, float, complex)
+    for elem in list:
+        if isinstance(elem, lista):
+            lista_numere.append(elem)
+    return lista_numere
+
+
+print("5.", number_list([1, "2", {"3": "a"}, {4, 5}, 5, 6, 3.0]))
+
 
 # Exercitiul 6
-# Să se scrie o funcție care are același comportament ca funcția de la exercițiul anterior, cu diferența că primește un parametru în plus: o funcție callback, care primește un parametru, iar pentru fiecare eroare apărută în procesarea fișierelor, se va apela funcția respectivă cu instanța excepției ca parametru.
-def exceptie(except_):
-    print(except_)
+# Write a function that receives a list with integers as parameter that contains an equal number of even and odd numbers that are in no specific order. The function should return a list of pairs
+# (tuples of 2 elements) of numbers (Xi, Yi) such that Xi is the i-th even number in the list and Yi is the i-th odd number
+def functie6(lista):
+    lista_pare = []
+    lista_impare = []
+    lista_finala = []
+    # creez o lista separata pentru numere pare si impare
+    for elem in lista:
+        if elem % 2 == 0:
+            lista_pare.append(elem)
+        elif elem % 2 == 1:
+            lista_impare.append(elem)
+    # zip este un iterator tuple, primul parametru si al doilea parametru sunt unite impreuna
+    # mentiune: daca iteratorii dati ca parametru au lungimi diferite, iteratorul cu cele mai putine elemente decide noua lungime a iteratorului
+    tuplu_zip = list(zip(lista_pare, lista_impare))
+    # in final toate tuplele sunt puse intr o lista
+    for i in range(0, len(lista_pare)):
+        tuplu = lista_pare[i], lista_impare[i]
+        lista_finala.append(tuplu)
+    print("6. zip: ", tuplu_zip)
+    print("6. Fara zip:", lista_finala)
 
-def functie6(target, to_search, callback_func):
-    try:
-        return functie5(target, to_search)
-    except Exception as exception:
-        return callback_func(exception)
-print("6.", functie6("../Laborator", "exemplu.txt", exceptie))
+
+functie6([1, 3, 5, 2, 8, 7, 4, 10, 9, 2])
+
 
 # Exercitiul 7
-# Să se scrie o funcție care primește ca parametru un șir de caractere care reprezintă calea către un fișer si returnează un dicționar cu următoarele cămpuri: full_path = calea absoluta catre fisier, file_size = dimensiunea fisierului in octeti, file_extension = extensia fisierului (daca are) sau "", can_read, can_write = True/False daca se poate citi din/scrie in fisier.
-def functie7(path):
-    file_ext = ""
-    if os.path.splitext(path)[1] != "":
-        file_ext = os.path.splitext(path)[1]
-    else:
-        file_ext = ""
-    path_info = {
-        "full_path": os.path.abspath(path),
-        # getsize - ia dimensiunea fisierului in octeti/bytes
-        "file_size": os.path.getsize(path),
-        "file_extension": file_ext,
-        # verific daca am dreptul sa citesc
-        "can_read": os.access(path, os.R_OK),
-        # verific daca am dreptul sa scriu
-        "can_write": os.access(path, os.W_OK)
-    }
-    return path_info
-print("7.", functie7("laboratorul5/laboratorul5.py"))
+def Fib1000():
+    # Fib: adun ultimele doua valori care o preceda pe urmatoarea pana ajung la 1000 de numere
+    nr1 = 0
+    nr2 = 1
+    lista_fib = [0, 1]
+    for i in range(2, 1000):
+        element_lista = nr1 + nr2
+        nr1 = nr2
+        nr2 = element_lista
+        lista_fib.append(element_lista)
+    return lista_fib
+
+
+# Daca filter_func are macar un False atunci functia trebuie sa returneze False
+def filtru(filtre, x):
+    for filter_func in filtre:
+        # Parametrii de filters ii iau ca pe o functie
+        if filter_func(x) == False:
+            return False
+    return True
+
+
+def process(**kwargs):
+    # initializare
+    filters = []
+    limit = 1000
+    offset = 0
+    out = []
+    lista_finala = []
+    lista_fib = Fib1000()
+    for kw_arg in kwargs.keys():
+        if kw_arg == "filters":
+            filters = kwargs["filters"]
+        elif kw_arg == "limit":
+            limit = kwargs["limit"]
+        elif kw_arg == "offset":
+            offset = kwargs["offset"]
+    # filtrez lista in functie de parametri
+    for elem in lista_fib:
+        if filtru(filters, elem) == True:
+            out.append(elem)
+    # in lista_final pun doar elementele din lista out care incep de la offset si se termina la limit
+    for elem in range(offset, offset + limit):
+        lista_finala.append(out[elem])
+    return lista_finala
+
+
+def sum_digits(x):
+    return sum(map(int, str(x)))
+
+
+def functie7():
+    return process(
+        filters=[
+            lambda item: item % 2 == 0,
+            lambda item: item == 2 or 4 <= sum_digits(item) <= 20,
+        ],
+        limit=2,
+        offset=2,
+    )
+
+
+print("7.", functie7())
+
 
 # Exercitiul 8
-# Să se scrie o funcție ce primește un parametru cu numele dir_path. Acest parametru reprezintă calea către un director aflat pe disc. Funcția va returna o listă cu toate căile absolute ale fișierelor aflate în rădăcina directorului dir_path.
+# Write a function called print_arguments with one parameter named function. The function will return one new function which prints the arguments and the keyword arguments received and will return the output of the function receives as a parameter.
+def print_arguments(function):
+    # functie imbricata, o functie folosita in alta functie
+    def afisare_param(*args, **kwargs):
+        print(args, kwargs)
+        return function(*args, **kwargs)
 
-# Exemplu apel funcție: functie("C:\\director") va returna ["C:\\director\\fisier1.txt", "C:\\director\\fisier2.txt"]
-def functie8(dir_path):
+    return afisare_param
+
+
+# Decoratorul este de regula o functie care primeste ca parametru o alta functie
+# In principiu extinde functionalitatea unei functii fara a modifica functia in sine
+@print_arguments
+def multiply_by_two(x):
+    return x * 2
+
+
+@print_arguments
+def add_numbers(a, b):
+    return a + b
+
+
+print("8. a)", multiply_by_two(2))
+print("8. a)", add_numbers(3, 4))
+
+
+def multiply_output(function):
+    def afisare_param(*args, **kwargs):
+        return 2 * function(*args, **kwargs)
+
+    return afisare_param
+
+
+@multiply_output
+def multiply_by_three(x):
+    return x * 3
+
+
+print("8. b)", multiply_by_three(10))
+
+
+# Exercitiul 9
+# Write a function that receives a list of pairs of integers (tuples with 2 elements) as parameter (named pairs). The function should return a list of dictionaries for each pair (in the same order as in the input list) that contain the following keys (as strings): sum (the value should be sum of the 2 numbers), prod (the value should be product of the two numbers), pow (the value should be the first number raised to the power of the second number)
+def functie9(pairs):
     out = []
-    for fisier in os.listdir(dir_path):
-        if os.path.isfile(fisier):
-            out.append(os.path.abspath(fisier))
+    for tuplu in pairs:
+        # creez un dictionar cu anumite key
+        pereche = {
+            "sum": tuplu[0] + tuplu[1],
+            "prod": tuplu[0] * tuplu[1],
+            "pow": tuplu[0] ** tuplu[1]
+            # alta metoda de ridicare la putere:
+            # pow(tuplu[0], tuplu[1])
+        }
+        out.append(pereche)
     return out
-print("8.", functie8("../Laborator"))
+
+
+print("9.", functie9(pairs=[(5, 2), (19, 1), (30, 6), (2, 2)]))

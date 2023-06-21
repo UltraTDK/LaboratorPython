@@ -1,147 +1,187 @@
-import re
+import os
+import sys
+
 
 # Exercitiul 1
-#   Write a function that receives as parameters two lists a and b and returns a list of sets containing: 
-# (a intersected with b, a reunited with b, a - b, b - a)
-def exercitiul1(a, b):
-    # set() - este utilizat pentru a stoca colecții de date
-    # intr-o singura variabila
-    a_intersectat_b = set(a) & set(b)
-    a_reunit_b = set(a) | set(b)
-    a_minus_b = set(a) - set(b)
-    b_minus_a = set(b) - set(a)
-    return [a_intersectat_b, a_reunit_b, a_minus_b, b_minus_a]
-print("1.", exercitiul1([1,2,3,5], [4,5,2,1]))
+# Să se scrie o funcție ce primeste un singur parametru, director, ce reprezintă calea către un director
+# Funcția returnează o listă cu extensiile unice sortate crescator (in ordine alfabetica) a fișierelor din directorul dat ca parametru.
+def functie1(direc):
+    out = []
+    # parametrii de care are nevoie os.walk
+    # by default imi cauta topdown in folder
+    for radacina, foldere, fisiere in os.walk(direc):
+        for fisier in fisiere:
+            # am divizat calea fisierului in doua parti, nume si extensie
+            extensie = os.path.splitext(fisier)
+            if extensie[1] != "":
+                out.append(extensie[1])
+    return sorted(out)
+
+
+print("1.", functie1("../Laborator"))
 
 
 # Exercitiul 2
-#   Write a function that receives a string as a parameter and returns a dictionary in which the keys are the characters in the character
-# string and the values are the number of occurrences of that character in the given text
-#   Example: For string "Ana has apples." given as a parameter the function will return the dictionary: {'a': 3, 's': 2, '.': 1, 'e': 1, 
-# 'h': 1, 'l': 1, 'p': 2, ' ': 2, 'A': 1, 'n': 1}
-def functie2(text): 
-    dictionar = {}
-    for litera in text:
-        contor = text.count(litera)
-        # formatul: dictionary[key] = value
-        # setez/caut cheia unui dictionar
-        dictionar[litera] = contor
-    return dictionar
-print("2.", functie2("Ana has apples."))
+# Să se scrie o funcție ce primește ca argumente două căi: director si fișier
+# Implementati functia astfel încât în fișierul de la calea fișier să fie scrisă pe câte o linie, calea absolută a fiecărui fișier din interiorul directorului de la calea folder, care incepe cu litera A.
+def functie2(director, fisier):
+    with open(fisier, "w") as my_file:
+        for file in os.listdir(director):
+            # obtin calea absoluta a unui fisier
+            cale_fisier = os.path.abspath(file)
+            # verific daca este fisier si daca incepe cu litera A
+            if os.path.isfile(cale_fisier) and file.startswith("A"):
+                my_file.write(cale_fisier + "\n")
+
+
+print("2.", functie2(".", "cale_absoluta.txt"))
+
+
+# Exercitiul 3
+# Să se scrie o funcție ce primește ca parametru un string my_path.
+# Dacă parametrul reprezintă calea către un fișier, se vor returna ultimele 20 de caractere din conținutul fișierului. Dacă parametrul reprezintă calea către un director, se va returna o listă de tuple (extensie, count), sortată descrescător după count, unde extensie reprezintă extensie de fișier, iar count - numărul de fișiere cu acea extensie. Lista se obține din toate fișierele (recursiv) din directorul dat ca parametru.
+def functie3(my_path):
+    count = 0
+    if os.path.isfile(my_path):
+        with open(my_path, "r") as my_file:
+            if os.path.getsize(my_path) >= 20:
+                # returneaza ultimele 20 de caractere dintr-un fisier
+                # -20: - parcurge 20 de caractere de la coada la cap
+                return my_file.read()[-20:]
+            else:
+                return "Fisierul nu are mai mult de 20 de caractere."
+    elif os.path.isdir(my_path):
+        lista_tuple = {}
+        for radacina, foldere, fisiere in os.walk(my_path):
+            for fisier in fisiere:
+                # am creat un dictionar cu extensii + countul fiecarei extensii
+                extensie = os.path.splitext(fisier)
+                if extensie[1] in lista_tuple:
+                    lista_tuple[extensie[1]] += 1
+                # initializez fiecare extensie
+                else:
+                    lista_tuple[extensie[1]] = 1
+
+    lista_recursiv = sorted(lista_tuple, key=lambda x: lista_tuple[x], reverse=True)
+    out = []
+    for elem in lista_recursiv:
+        pereche = (elem, lista_tuple[elem])
+        out.append(pereche)
+    return out
+
+
+# Verificare pt director
+# print("3.", functie3("../Laborator"))
+# Verificare pt fisier
+print("3.", functie3("exemplu.txt"))
 
 
 # Exercitiul 4
-# The build_xml_element function receives the following parameters: tag, content, and key-value elements given as name-parameters. Build and return a 
-# string that represents the corresponding XML element.
+# Să se scrie o funcție ce returnează o listă cu extensiile unice a fișierelor din directorul dat ca argument la linia de comandă (nerecursiv). Lista trebuie să fie sortată crescător.
+# Mențiune: extensia fișierului ‘fisier.txt’ este ‘txt’, iar ‘fisier’ nu are extensie, deci nu va apărea în lista finală.
+def functie4():
+    # trebuie sa apelez fisierul de la linia de comanda
+    # de exemplu: py laboratorul5/laboratorul5.py .  --> cu "." imi cauta in tot folderul Laborator
+    cale_dir = sys.argv[1]
+    lista_tuple = {}
+    out = []
+    for radacina, foldere, fisiere in os.walk(cale_dir):
+        for fisier in fisiere:
+            extensie = os.path.splitext(fisier)
+            if extensie[1] in lista_tuple:
+                lista_tuple[extensie[1]] += 1
+            else:
+                lista_tuple[extensie[1]] = 1
+    for elem in lista_tuple.keys():
+        # caut elementele unice
+        if lista_tuple[elem] == 1:
+            out.append(elem)
+    return sorted(out)
 
-#  Example: build_xml_element ("a", "Hello there", href =" http://python.org ", _class =" my-link 
-# ", id= " someid ") returns  the string = "<a href=\"http://python.org \ "_class = \" my-link \ "id = \" someid \ "> Hello there </a>"
-def functie4(tag, content, **key_val):
-    format_procesat = ""
-    for key in key_val:
-        # f-string: se evalueaza parametrii pusi intre {}
-        # este alternativa functiei format() 
-        format_procesat += f"{key}=\"{key_val[key]}\""
-    format_final = ("<" + tag + " " + format_procesat + "> " + content + " </" + tag + ">")
-    return format_final
-print("4.", functie4("a", "Hello there", href =" http://python.org ", _class =" my-link ", id= " someid "))
+
+# print("4.", functie4())
 
 
 # Exercitiul 5
-#   The validate_dict function that receives as a parameter a set of tuples ( that represents validation rules for a dictionary that
-#  has strings as keys and values) and a dictionary. A rule is defined as follows: (key, "prefix", "middle", "suffix"). A value is 
-# considered valid if it starts with "prefix", "middle" is inside the value (not at the beginning or end) and ends with "suffix". 
-#   The function will return True if the given dictionary matches all the rules, False otherwise.
-def validate_dict(tuple, dictionar):
-    format = {}
-    for cheie in dictionar:
-        for tuplu in tuple:
-            if cheie == tuplu[0]:
-                # f-string: este o reprezentare a unui text care nu se afla in textul original
-                # \w - caractere alfanumerice + caracterul underscore '_'
-                # * - cel putin 0 repetetii, cauta subsirul cel mai lung
-                # \\ - ca sa pot folosi \w trebuie sa dau escape la backslash, astfel previn comportamentul
-                # normal al unui grup de caractere
-                # match - cauta caracterele care dau match cu pattern-ul
-                if re.match(f"tuplu[1]\\w*tuplu[2]\\w*tuplu[3]", dictionar[cheie]):
-                    return True
-                else:
-                    return False
-    return False
-    
-print("5.", validate_dict({("key1", "", "inside", ""), ("key2", "start", "middle", "winter")}, {"key1": "come inside, it's too cold out", "key3": "this is not valid"}))
+# Să se scrie o funcție care primește ca argumente două șiruri de caractere, target și to_search și returneaza o listă de fișiere care conțin to_search. Fișierele se vor căuta astfel: dacă target este un fișier, se caută doar in fișierul respectiv iar dacă este un director se va căuta recursiv in toate fișierele din acel director. Dacă target nu este nici fișier, nici director, se va arunca o excepție de tipul ValueError cu un mesaj corespunzator.
+def functie5(target, to_search):
+    content = ""
+    target_dir = []
+    if os.path.isfile(target):
+        with open(target, "r") as my_file:
+            content = my_file.read()
+            if to_search in content:
+                return [target]
+            else:
+                return []
+    elif os.path.isdir(target):
+        for radacina, foldere, fisiere in os.walk(target):
+            for fisier in fisiere:
+                if os.path.isfile(fisier):
+                    with open(fisier, "r") as my_file:
+                        content = my_file.read()
+                        if to_search in content:
+                            target_dir.append(fisier)
+        return target_dir
+    else:
+        # conform cerintei am aruncat o exceptie
+        raise ValueError("Nu este nici fisier nici director.")
+
+
+# print("5.", functie5("laboratorul5/laboratorul5.py", "exemplu.txt"))
+print("5.", functie5("../Laborator", "exemplu.txt"))
 
 
 # Exercitiul 6
-#   Write a function that receives as a parameter a list and returns a tuple (a, b), representing the number of unique elements in
-# the list, and b representing the number of duplicate elements in the list (use sets to achieve this objective).
-def functie6(lista):
-    lista_unic = []
-    lista_duplicat = []
-    for elem in lista:
-        if elem not in lista_unic:
-            lista_unic.append(elem)
-        elif elem not in lista_duplicat and elem in lista_unic:
-            lista_duplicat.append(elem)
-    multime = (len(lista_unic), len(lista_duplicat))
-    return multime
-print("6.", functie6([1, 2, 3, 3, 4, 5, 1]))
+# Să se scrie o funcție care are același comportament ca funcția de la exercițiul anterior, cu diferența că primește un parametru în plus: o funcție callback, care primește un parametru, iar pentru fiecare eroare apărută în procesarea fișierelor, se va apela funcția respectivă cu instanța excepției ca parametru.
+def exceptie(except_):
+    print(except_)
+
+
+def functie6(target, to_search, callback_func):
+    try:
+        return functie5(target, to_search)
+    except Exception as exception:
+        return callback_func(exception)
+
+
+print("6.", functie6("../Laborator", "exemplu.txt", exceptie))
 
 
 # Exercitiul 7
-#   Write a function that receives a variable number of sets and returns a dictionary with the following operations from all sets two
-# by two: reunion, intersection, a-b, b-a. The key will have the following form: "a op b", where a and b are two sets, and op is the 
-# applied operator: |, &, -. 
-def operatii(multime1, multime2):
-    dictionar = {
-        # am folosit str, deoarece cheie unui dictionar trebuie sa fie imutable
-        # concret: cheia nu poate fi modificata (cel putin asa am inteles din curs)
-        str(multime1) + "&" + str(multime2): multime1 & multime2,
-        str(multime1) + "|" + str(multime2): multime1 | multime2,
-        str(multime1) + "-" + str(multime2): multime1 - multime2,
-        str(multime2) + "-" + str(multime1): multime2 - multime1
+# Să se scrie o funcție care primește ca parametru un șir de caractere care reprezintă calea către un fișer si returnează un dicționar cu următoarele cămpuri: full_path = calea absoluta catre fisier, file_size = dimensiunea fisierului in octeti, file_extension = extensia fisierului (daca are) sau "", can_read, can_write = True/False daca se poate citi din/scrie in fisier.
+def functie7(path):
+    file_ext = ""
+    if os.path.splitext(path)[1] != "":
+        file_ext = os.path.splitext(path)[1]
+    else:
+        file_ext = ""
+    path_info = {
+        "full_path": os.path.abspath(path),
+        # getsize - ia dimensiunea fisierului in octeti/bytes
+        "file_size": os.path.getsize(path),
+        "file_extension": file_ext,
+        # verific daca am dreptul sa citesc
+        "can_read": os.access(path, os.R_OK),
+        # verific daca am dreptul sa scriu
+        "can_write": os.access(path, os.W_OK),
     }
-    return dictionar
-def functie7(*multimi):
-    dictionar = {}
-    # asemanator ca la Bubble Sort, am procedat astfel pentru a nu verifica o pereche de doua ori
-    # (a,b) si (b,a)
-    for i in range(0, len(multimi) - 1):
-        for j in range(i + 1, len(multimi)):
-            rezultat = operatii(multimi[i], multimi[j])
-            # concatenare intre dictionarul cu operatii si dictionarul final
-            for elem in rezultat:
-                dictionar[elem] = rezultat[elem]
-    return dictionar
-print("7.", functie7({1,2}, {2,3}))
+    return path_info
 
+
+print("7.", functie7("laboratorul5/laboratorul5.py"))
 
 # Exercitiul 8
-#   Write a function that receives a single dict parameter named mapping. This dictionary always contains a string key "start". Starting
-# with the value of this key you must obtain a list of objects by iterating over mapping in the following way: the value of the current 
-# key is the key for the next value, until you find a loop (a key that was visited before). The function must return the list of objects 
-# obtained as previously described.
-def functie8(mapping):
-    lista = []
-    lista_finala = []
-    elem = 'start'
-    while elem not in lista:
-        lista.append(elem)
-        elem = mapping[elem]
-    # am creat acest for pentru a evita stringul "start" aflat la inceputul listei
-    for i in range(1, len(lista)):
-        lista_finala.append(lista[i])
-    return lista_finala
-print("8.", functie8({'start': 'a', 'b': 'a', 'a': '6', '6': 'z', 'x': '2', 'z': '2', '2': '2', 'y': 'start'}))
+# Să se scrie o funcție ce primește un parametru cu numele dir_path. Acest parametru reprezintă calea către un director aflat pe disc. Funcția va returna o listă cu toate căile absolute ale fișierelor aflate în rădăcina directorului dir_path.
 
 
-# Exercitiul 9
-#  Write a function that receives a variable number of positional arguments and a variable number of keyword arguments and will 
-# return the number of positional arguments whose values can be found among keyword arguments values.
-def functie9(*arguments, **kwarguments):
-    counter = 0
-    for argument in arguments:
-        if argument in kwarguments.values():
-            counter += 1
-    return counter
-print("9.", functie9(1, 2, 3, 4, x=1, y=2, z=3, w=5))
+# Exemplu apel funcție: functie("C:\\director") va returna ["C:\\director\\fisier1.txt", "C:\\director\\fisier2.txt"]
+def functie8(dir_path):
+    out = []
+    for fisier in os.listdir(dir_path):
+        if os.path.isfile(fisier):
+            out.append(os.path.abspath(fisier))
+    return out
+
+
+print("8.", functie8("../Laborator"))

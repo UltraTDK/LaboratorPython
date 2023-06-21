@@ -11,9 +11,11 @@ ADDR = (SERVER, PORT)
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client.connect(ADDR)
 
+
 def send(mesaj):
     # Cand trimit un mesaj trebuie sa fie de tip byte object
     client.send(bytes(mesaj, encoding=FORMAT))
+
 
 def read():
     # Astept informatii de la client
@@ -28,6 +30,7 @@ def client_gives_word():
     hint = input("[server]: Ofera un hint: ")
     return word, hint
 
+
 read()
 
 cuvant, hint = client_gives_word()
@@ -35,4 +38,3 @@ cuvant, hint = client_gives_word()
 send(cuvant)
 send(hint)
 read()
-    

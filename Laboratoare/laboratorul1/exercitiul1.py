@@ -1,7 +1,7 @@
 # Find The greatest common divisor of multiple numbers read from the console
 
 print("Cate numere vrei sa introduci?")
-lungimeSir= int(input())
+lungimeSir = int(input())
 # numerele trebuie scrise pe un rand separat apasand tasta enter
 print("Introdu numerele: ")
 numar1 = int(input())

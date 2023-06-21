@@ -8,8 +8,8 @@ HEADER = 256
 FORMAT = "utf-8"
 # Am ales un port care nu este folosit
 PORT = 5500
-# Pot folosi doua metode: 
-#      una in care ip-ul este setat manual 
+# Pot folosi doua metode:
+#      una in care ip-ul este setat manual
 #      sau este preluat automat
 # SERVER = "192.168.228.1" -> pt verificare
 SERVER = socket.gethostbyname(socket.gethostname())
@@ -22,9 +22,11 @@ server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 # Am legat socketul de adresa
 server_socket.bind(ADDR)
 
+
 def send(mesaj, client):
     # Cand trimit un mesaj trebuie sa fie de tip byte object
     client.send(bytes(mesaj, encoding=FORMAT))
+
 
 def read(client):
     # Astept informatii de la client
@@ -32,16 +34,19 @@ def read(client):
     # verific daca mesajul nu este gol
     if mesaj_primit != None:
         return mesaj_primit
-    
+
+
 # server_socket.accept este o linie blocanta, pana cand serverul primeste feedback de la client
 clienti = []
+
+
 def start():
     print("[server]: a inceput petrecerea.")
     server_socket.listen()
     print(f"[server]: petrecerea este in camera: {SERVER}")
     while True:
         # Salvez adresa, iar mai apoi creez obiectul pe server
-        conn, addr =  server_socket.accept()
+        conn, addr = server_socket.accept()
         clienti.append(conn)
 
         if len(clienti) == 2:
@@ -50,11 +55,12 @@ def start():
     invitat2 = clienti[1]
     send("[server]: ambii invitati au ajuns la petrecere.", invitat1)
     try:
-        spanzuratoarea_func(invitat1, invitat2) 
+        spanzuratoarea_func(invitat1, invitat2)
     # am tratat cazul in care un client s-a deconectat de pe server
     except Exception as exceptie:
         print(exceptie)
-    
+
+
 def spanzuratoarea_func(client1, client2):
     player1 = [read(client1), read(client1)]
     cuvant = list(player1[0].upper())
@@ -74,12 +80,14 @@ def spanzuratoarea_func(client1, client2):
         exit(0)
 
     for i in range(0, len(cuvant)):
-        guess_word.append('_')
+        guess_word.append("_")
 
     # o varianta care mi s-a parut accesebila este ca pe masura ce clientul 2 ghiceste o litera sa scad acea litera din cuvant
     # pana cand cuvantul este gol, moment in care executia se termina
     while len(cuvant) > 0 and incercari > 0:
-        afisare_cuvant = (str(guess_word) + " incercari: " + str(incercari) + " Hint: " + str(hint))
+        afisare_cuvant = (
+            str(guess_word) + " incercari: " + str(incercari) + " Hint: " + str(hint)
+        )
         send(afisare_cuvant, client2)
         input_player2 = (read(client2)).upper()
 
@@ -94,7 +102,7 @@ def spanzuratoarea_func(client1, client2):
                     pozitie += 1
             litere_folosite.append(input_player2)
             if input_player2 in cuvant:
-                cuvant.remove(input_player2)         
+                cuvant.remove(input_player2)
         elif input_player2 in litere_folosite:
             send("[server]: Ai folosit deja aceasta litera.", client2)
         elif input_player2 not in alfabet:
@@ -104,7 +112,12 @@ def spanzuratoarea_func(client1, client2):
             incercari -= 1
             send("[server]: Litera nu face parte din cuvant", client2)
         if incercari == 0:
-            send("[server]: Ai ramas fara incercari. Cuvantul era: " + str(cuvant_backup) + "\n", client2)
+            send(
+                "[server]: Ai ramas fara incercari. Cuvantul era: "
+                + str(cuvant_backup)
+                + "\n",
+                client2,
+            )
     if cuvant_backup == guess_word:
         send("[server:] Felicitari! Ai ghicit cuvantul: " + str(guess_word), client2)
     else:
